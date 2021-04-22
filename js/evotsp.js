@@ -2,7 +2,7 @@
 
     // You'll need to replace this with the URL you get when you
     // deploy your API Gateway.
-    const baseUrl = 'https://nh5gsos957.execute-api.us-east-1.amazonaws.com/prod/'
+    const baseUrl = 'https://zdeoqq25ng.execute-api.us-east-1.amazonaws.com/prod/'
     console.log(`The base URL is ${baseUrl}.`);
 
     // Set up the functions to be called when the user clicks on any
@@ -34,9 +34,9 @@
             success: showRoute,
             error: function ajaxError(jqXHR, textStatus, errorThrown) {
                 console.error(
-                    'Error generating random route: ', 
-                    textStatus, 
-                    ', Details: ', 
+                    'Error generating random route: ',
+                    textStatus,
+                    ', Details: ',
                     errorThrown);
                 console.error('Response: ', jqXHR.responseText);
                 alert('An error occurred when creating a random route:\n' + jqXHR.responseText);
@@ -62,7 +62,7 @@
     function randomRoutes(event) {
         const runId = $('#runId-text-field').val();
         const generation = $('#generation-text-field').val();
-        const numToGenerate =$('#num-to-generate').val();
+        const numToGenerate = $('#num-to-generate').val();
         // Reset the contents of `#new-route-list` so that it's ready for
         // `showRoute()` to "fill" it with the incoming new routes. 
         $('#new-route-list').text('');
@@ -87,7 +87,36 @@
     // You should add each of these to `#best-route-list`
     // (after clearing it first).
     function getBestRoutes(event) {
-        alert('You need to implement getBestRoutes()');
+        const runId = $('#runId-text-field').val();
+        const numBest = $('#num-best-to-get').val();
+        const generation = $('#generation-text-field').val();
+        $('#best-route-list').text('');
+
+        $.ajax({
+            method: 'GET',
+            url: baseUrl + `/best?runId=${runId}&generation=${generation}&numToReturn=${numBest}`,
+            contentType: 'application/json',
+
+            success: showBestRoutes,
+            error: function ajaxError(jqXHR, textStatus, errorThrown) {
+                console.error(
+                    'Error retrieving route: ',
+                    textStatus,
+                    ', Details: ',
+                    errorThrown);
+                console.error('Response: ', jqXHR.responseText);
+                alert('An error occurred when retrieivng route:\n' + jqXHR.responseText);
+            }
+        })
+    }
+
+    function showBestRoutes(result) {
+        for (let i = 0; i < result.length; i++) {
+            const routeId = result[i].routeId;
+            const length = result[i].length;
+
+            $('#best-route-list').append(`<li>routeId: ${routeId} length: ${length}</li>`);
+        }
     }
 
     // Make a `GET` request that gets all the route information
@@ -97,8 +126,45 @@
     // This request will return a complete route JSON object.
     // You should display the returned information in 
     // `#route-by-id-elements` (after clearing it first).
-    function getRouteById() {
-        alert('You need to implement getRouteById()');
+    function getRouteById(event) {
+        const routeId = $('#route-ID').val();
+        // const routeId = $('#route-ID').val();
+        $('#route-ID').text('');
+
+        $.ajax({
+            method: 'GET',
+            url: baseUrl + `/routes/${routeId}`,
+            contentType: 'application/json',
+
+            success: showRouteByID,
+            error: function ajaxError(jqXHR, textStatus, errorThrown) {
+                console.error(
+                    'Error retrieving route by ID: ',
+                    textStatus,
+                    ', Details: ',
+                    errorThrown
+                );
+                console.error('Response: ', jqXHR.responseText);
+                alert('An error occurred while retrieving route data\n' + jqXHR.responseText);
+
+                // $('#route-by-id-elements').append(`<li>Parition Key: ${partitionKey}</li>
+                // <li>Route ID: ${routeId}</li>
+                // <li>Length: ${length} </li>
+                // <li>Route: ${route}</li>`);
+            }
+        })
+    }
+
+    function showRouteByID(result) {
+        const partitionKey = result[0].partitionKey;
+        const routeId = result[0].routeId;
+        const route = result[0].route;
+        const length = result[0].length;
+
+        $('#route-by-id-elements').append(`<li>Parition Key: ${partitionKey}</li>
+        <li>Route ID: ${routeId}</li>
+        <li>Route: ${route}</li>
+        <li>Length: ${length} </li>`)
     }
 
 }(jQuery));
